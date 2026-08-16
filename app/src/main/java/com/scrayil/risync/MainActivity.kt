@@ -22,6 +22,8 @@ class MainActivity : Activity() {
 
         val start = Button(this).apply {
             text = "Start Syncthing"
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.play_24, 0, 0, 0)
+            compoundDrawablePadding = 24
             setOnClickListener {
                 startForegroundService(Intent(this@MainActivity, SyncthingService::class.java))
             }
@@ -29,6 +31,8 @@ class MainActivity : Activity() {
 
         val stop = Button(this).apply {
             text = "Stop Syncthing"
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.stop_24, 0, 0, 0)
+            compoundDrawablePadding = 24
             setOnClickListener {
                 stopService(Intent(this@MainActivity, SyncthingService::class.java))
             }
@@ -36,6 +40,8 @@ class MainActivity : Activity() {
 
         val openGui = Button(this).apply {
             text = "Open GUI"
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.globe_24, 0, 0, 0)
+            compoundDrawablePadding = 24
             setOnClickListener {
                 val config = readGuiConfig()
                 if (config == null) {
@@ -49,6 +55,7 @@ class MainActivity : Activity() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
+            setPadding(48, 48, 48, 48)
             addView(start)
             addView(stop)
             addView(openGui)
