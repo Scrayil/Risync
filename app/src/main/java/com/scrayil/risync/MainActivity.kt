@@ -1,6 +1,9 @@
 package com.scrayil.risync
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Xml
@@ -11,14 +14,35 @@ import android.widget.Toast
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
 import androidx.core.net.toUri
+import android.os.Environment
+import android.provider.Settings
+import android.view.View
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 
 class MainActivity : Activity() {
     data class GuiConfig(val url: String, val apiKey: String?)
+
+    fun requestStoragePermission() {
+        if (!Environment.isExternalStorageManager()) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.addCategory("android.intent.category.DEFAULT")
+                intent.data = String.format("package:%s", packageName).toUri()
+                startActivity(intent)
+            } catch (_: Exception) {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivity(intent)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+        requestStoragePermission()
 
         val start = Button(this).apply {
             text = "Start Syncthing"
@@ -52,6 +76,19 @@ class MainActivity : Activity() {
             }
         }
 
+        val basePath = Environment.getExternalStorageDirectory().absolutePath
+        val copyPath = Button(this).apply {
+            text = "Copy base path"
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.copy_24, 0, 0, 0)
+            compoundDrawablePadding = 24
+        }
+        copyPath.setOnClickListener {
+            val clipboard = ContextCompat.getSystemService(this, ClipboardManager::class.java)
+            val clip = ClipData.newPlainText("Path", basePath)
+            clipboard?.setPrimaryClip(clip)
+            Toast.makeText(this, "Copied: $basePath", Toast.LENGTH_SHORT).show()
+        }
+
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
@@ -59,6 +96,7 @@ class MainActivity : Activity() {
             addView(start)
             addView(stop)
             addView(openGui)
+            addView(copyPath)
         }
 
         setContentView(layout)
