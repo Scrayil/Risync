@@ -46,9 +46,7 @@ jobs:
         run: |
           sudo add-apt-repository -y ppa:fdroid/fdroidserver
           sudo apt-get update
-          
-          sudo apt-get install -y fdroidserver python3-yaml python3-pip
-          sudo pip3 install --upgrade androguard --break-system-packages
+          sudo apt-get install -y fdroidserver
 
       - name: Generating the F-Droid repository
         env:
