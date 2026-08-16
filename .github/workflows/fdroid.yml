@@ -48,22 +48,33 @@ jobs:
           sudo apt-get install -y fdroidserver
 
       - name: Generating the F-Droid repository
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
           mkdir -p fdroid/repo
-          
-          # Copying the newly generated apk in the catalog
           cp ${{steps.sign_app.outputs.signedReleaseFile}} fdroid/repo/
           
           cd fdroid
           
-          # Configuring the repository with the same signature
-          echo "repo_name: 'Risync'" > config.yml
-          echo "repo_description: 'Personal repository'" >> config.yml
-          echo "keystore: '../keystore.jks'" >> config.yml
-          echo "repo_keyalias: '${{ secrets.KEY_ALIAS }}'" >> config.yml
-          echo "keystorepass: '${{ secrets.KEY_PASSWORD }}'" >> config.yml
-          echo "keypass: '${{ secrets.KEY_PASSWORD }}'" >> config.yml
+          # Generating the configuration
+          python3 - <<'EOF'
+          import yaml, os
           
+          config = {
+              'repo_name': 'Risync',
+              'repo_description': 'Personal repository',
+              'keystore': '../keystore.jks',
+              'repo_keyalias': os.environ.get('KEY_ALIAS'),
+              'keystorepass': os.environ.get('KEY_PASS'),
+              'keypass': os.environ.get('KEY_PASS')
+          }
+          
+          with open('config.yml', 'w') as f:
+              yaml.safe_dump(config, f)
+          EOF
+          
+          # Generating the catalog index
           fdroid update -c
 
       - name: Preparing GitHub Pages files
