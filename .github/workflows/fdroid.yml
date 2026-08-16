@@ -50,10 +50,11 @@ jobs:
       - name: Generating the F-Droid repository
         run: |
           mkdir -p fdroid/repo
-          cd fdroid
           
           # Copying the newly generated apk in the catalog
           cp ${{steps.sign_app.outputs.signedReleaseFile}} repo/
+          
+          cd fdroid
           
           # Configuring the repository with the same signature
           echo "repo_name: 'Risync'" > config.yml
