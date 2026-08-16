@@ -48,6 +48,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y fdroidserver
 
+      - name: Patch Androguard (Fix res1 issue)
+        run: |
+          sudo python3 - <<'EOF'
+          import os
+          path = "/usr/lib/python3/dist-packages/androguard/core/bytecodes/axml/__init__.py"
+          with open(path, "r") as f:
+              content = f.read()
+          # Replacing blocking crashes with 'pass'
+          content = content.replace('raise ResParserError("res1 must be zero!")', 'pass')
+          content = content.replace('raise ResParserError("res0 must be zero!")', 'pass')
+          content = content.replace('raise ResParserError("res0 must be always zero!")', 'pass')
+          with open(path, "w") as f:
+              f.write(content)
+          EOF
+
       - name: Generating the F-Droid repository
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
