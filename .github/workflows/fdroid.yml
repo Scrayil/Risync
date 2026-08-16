@@ -52,7 +52,7 @@ jobs:
           mkdir -p fdroid/repo
           
           # Copying the newly generated apk in the catalog
-          cp ${{steps.sign_app.outputs.signedReleaseFile}} repo/
+          cp ${{steps.sign_app.outputs.signedReleaseFile}} fdroid/repo/
           
           cd fdroid
           
