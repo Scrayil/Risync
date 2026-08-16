@@ -42,10 +42,13 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "36.0.0"
 
-      - name: Installing F-Droid Server
+      - name: Install F-Droid Server
         run: |
+          sudo add-apt-repository -y ppa:fdroid/fdroidserver
           sudo apt-get update
-          sudo apt-get install -y fdroidserver
+          
+          sudo apt-get install -y fdroidserver python3-yaml python3-pip
+          sudo pip3 install --upgrade androguard --break-system-packages
 
       - name: Generating the F-Droid repository
         env:
