@@ -1,0 +1,36 @@
+# Cache and local settings
+.gradle
+.kotlin/
+local.properties
+.DS_Store
+
+# Build folders
+build/
+*/build/
+
+# Generated artefacts
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.log
+
+# C/C++ and Profiler
+.cxx
+.externalNativeBuild
+/captures
+
+# Android Studio IDE / IntelliJ
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Keystore and secret keys
+*.jks
+*.keystore
+keystore.properties

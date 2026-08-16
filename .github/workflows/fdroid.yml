@@ -1,0 +1,81 @@
+name: Deploy F-Droid Repo
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Compiling the APK Release
+        run: ./gradlew assembleRelease
+
+      - name: Decoding the Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+
+      - name: Signing the APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Installing F-Droid Server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fdroidserver
+
+      - name: Generating the F-Droid repository
+        run: |
+          mkdir -p fdroid/repo
+          cd fdroid
+          
+          # Copying the newly generated apk in the catalog
+          cp ${{steps.sign_app.outputs.signedReleaseFile}} repo/
+          
+          # Configuring the repository with the same signature
+          echo "repo_name: 'Risync'" > config.yml
+          echo "repo_description: 'Personal repository'" >> config.yml
+          echo "keystore: '../keystore.jks'" >> config.yml
+          echo "repo_keyalias: '${{ secrets.KEY_ALIAS }}'" >> config.yml
+          echo "keystorepass: '${{ secrets.KEY_PASSWORD }}'" >> config.yml
+          echo "keypass: '${{ secrets.KEY_PASSWORD }}'" >> config.yml
+          
+          fdroid update -c
+
+      - name: Preparing GitHub Pages files
+        run: |
+          # Moving only the public folder to avoid uploading the config.yml
+          mkdir -p pages_root/fdroid
+          mv fdroid/repo pages_root/fdroid/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Loading the artefact for the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'pages_root'
+
+      - name: Publishing on GitHub Pages
+        uses: actions/deploy-pages@v4
