@@ -1,10 +1,14 @@
 # SYNCTHING LIBRARY COMPILATIONS
 ```sh
-cd /home/<USER>/Desktop/dev/git/syncthing
+cd /home/$USER/Desktop/dev/git/syncthing
 git checkout main
 git pull
+git tag | tail
 git checkout <LATEST_STABLE_TAG>
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -tags noupgrade -trimpath -o syncthing ./cmd/syncthing
+export NDK=/home/$USER/Android/Sdk/ndk/<VERSION>
+export CC=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android<API>-clang
+CGO_ENABLED=1 GOOS=android GOARCH=arm64 go build -tags noupgrade -trimpath -ldflags="-checklinkname=0" -o syncthing ./cmd/syncthing
+# CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -tags noupgrade -trimpath -o syncthing ./cmd/syncthing
 cp syncthing ../Risync/app/src/main/jniLibs/arm64-v8a/libsyncthing.so
 ```
 
